@@ -1,0 +1,44 @@
+# Rule-based incident classification. Each run's notes are matched against these patterns
+# (case-insensitive regular expressions). A run can have several incidents.
+#
+#   severity: failure    the step failed and nothing was delivered
+#             recovered  something went wrong but the agent recovered (fallback, no re-run)
+#             warning    delivered, but the result could not be fully confirmed
+
+categories:
+  - id: design_generation_failed
+    label: Design generation failed
+    severity: recovered
+    patterns: ['generate-design failed', 'generation failed']
+  - id: design_quota_exceeded
+    label: Design tool quota exceeded
+    severity: recovered
+    patterns: ['quota_exceeded', 'quota exceeded', 'credit quota']
+  - id: fallback_layout_used
+    label: Fallback layout used
+    severity: recovered
+    patterns: ['built by copying', 'copy(ing)? the checked']
+  - id: quality_check_fixed
+    label: Quality check fixed the graphic
+    severity: recovered
+    patterns: ['\bfixed\b', 'corrected', 'removed a stray', 'covered faint']
+  - id: quality_check_failed
+    label: Graphic failed quality check
+    severity: failure
+    patterns: ['failed quality check']
+  - id: gateway_error_no_rerun
+    label: Gateway error, run confirmed without re-running
+    severity: recovered
+    patterns: ['bad gateway', 'gateway timeout', '\b50[234]\b']
+  - id: connection_expired
+    label: Connection expired
+    severity: failure
+    patterns: ['connection (has )?expired', 'reauthori[sz]e', 'invalid token']
+  - id: result_unconfirmed
+    label: Platform result unconfirmed
+    severity: warning
+    patterns: ['unconfirmed', 'not readable via the api']
+  - id: schedule_missed
+    label: Scheduled run did not fire
+    severity: failure
+    patterns: ['did not fire', 'had not fired', 'did not post']

@@ -1,0 +1,37 @@
+# The automations being measured. Each run is logged as one record in a Make data store;
+# the record key tells us which agent produced it.
+#
+#   key_pattern     regular expression matched against the record key
+#   schedule        weekdays the agent is expected to run (mon..sun), used to spot missed runs
+#   manual_minutes  ESTIMATE of how long the same work takes by hand; used for "hours saved".
+#                   These are assumptions, shown on the dashboard. Change them to your own.
+#   success_status  record statuses that count as a successful run
+
+agents:
+  social_post:
+    label: Social post (Facebook + Instagram)
+    key_pattern: '^\d{4}-\d{2}-\d{2}$'
+    schedule: [mon, wed, fri]
+    manual_minutes: 60
+    success_status: [Posted]
+    partial_status: [Partial]
+  weekly_reel:
+    label: Weekly reel
+    key_pattern: '^reel-\d{4}-\d{2}-\d{2}$'
+    schedule: [tue]
+    manual_minutes: 45
+    success_status: [Posted]
+    partial_status: [Partial]
+    weekly: true          # one run per week; a late run in the same week still counts
+  whatsapp_pack:
+    label: WhatsApp Status pack
+    key_pattern: '^wa-\d{4}-\d{2}-\d{2}$'
+    schedule: [mon, tue, wed, thu, fri, sat, sun]
+    manual_minutes: 40
+    success_status: [Sent to Carol, Sent]
+    partial_status: [Partial]
+
+# Statuses that mean "not a run" (yet): excluded from run counts.
+not_runs: [Planned, Active, Use, Exclude]
+# Statuses that mean the owner chose to skip; counted separately, not as failures.
+skipped: [Skipped]
