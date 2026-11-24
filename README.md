@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/Cngima/automation-metrics-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/Cngima/automation-metrics-dashboard/actions/workflows/ci.yml)
 
+**Live demo: [carol-automation-metrics.streamlit.app](https://carol-automation-metrics.streamlit.app/)** (fictional sample data)
+
 Measures scheduled AI automations the way an operations lead would: how often they run, how often they succeed, what goes wrong, which problems the agents recover from on their own, which scheduled runs never happened, and how much manual time they save.
 
 I built it to monitor the AI agents that run marketing for **Lynn Resumes**, my CV writing business ([how those agents work](https://github.com/Cngima/lynn-resumes-automation)). Three scheduled Claude agents create and publish social posts, a weekly reel and a daily WhatsApp Status pack, and log every run to a Make data store. This project reads that log (read-only), classifies each run and turns it into the metrics below.
