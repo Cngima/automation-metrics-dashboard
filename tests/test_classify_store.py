@@ -97,3 +97,23 @@ def test_sync_log(store):
     store.finish_sync(sid, {"fetched": 3, "inserted": 3}, error=None)
     last = store.last_sync()
     assert last["source"] == "test" and last["fetched"] == 3 and last["finished"]
+
+
+def test_store_can_be_read_from_another_thread(store, classifier, week_records):
+    """Streamlit runs each session in its own thread; a connection must not be shared across them."""
+    import threading
+
+    from automation_metrics.store import Store
+
+    store.upsert_records(week_records, classifier)
+    result = {}
+
+    def read():
+        s = Store(store.path)
+        result["n"] = len(s.runs())
+        s.close()
+
+    t = threading.Thread(target=read)
+    t.start()
+    t.join()
+    assert result["n"] == 8

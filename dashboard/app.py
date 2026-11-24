@@ -28,18 +28,20 @@ st.set_page_config(page_title="Automation metrics", layout="wide")
 
 
 @st.cache_resource
-def demo_store() -> Store:
+def demo_db_path() -> Path:
+    """Build the demo database once per server; every session then opens its own connection to it."""
     path = ROOT / "data" / "demo.db"
     path.unlink(missing_ok=True)
     store = Store(path)
     store.upsert_records(demo.sample_records(), Classifier())
-    return store
+    store.close()
+    return path
 
 
 def pick_store() -> tuple[Store, bool]:
     private = Settings.from_env().db_path
     if "--demo" in sys.argv or not private.exists():
-        return demo_store(), True
+        return Store(demo_db_path()), True
     return Store(private), False
 
 
@@ -106,7 +108,7 @@ with left:
             .transform_calculate(outcome_order="indexof(['success','partial','failed','skipped'], datum.outcome)")
             .properties(height=300, autosize=alt.AutoSizeParams(type="fit", contains="padding"))
         )
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, width="stretch")
 with right:
     st.subheader("Incidents by type")
     breakdown = metrics.incident_breakdown(incidents_f, start, end)
@@ -128,17 +130,17 @@ with right:
             )
             .properties(height=300, autosize=alt.AutoSizeParams(type="fit", contains="padding"))
         )
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, width="stretch")
         st.caption("Red: failure, nothing delivered. Blue: recovered by the agent. Amber: delivered but not confirmed.")
 
 # ---------- tables ----------
 st.subheader("By automation")
-st.dataframe(metrics.agent_summary(cfg_f, runs_f, start, end), hide_index=True, use_container_width=True)
+st.dataframe(metrics.agent_summary(cfg_f, runs_f, start, end), hide_index=True, width="stretch")
 
 col_a, col_b = st.columns([1, 1])
 with col_a:
     st.subheader("Platform reliability")
-    st.dataframe(metrics.platform_reliability(runs_f, start, end), hide_index=True, use_container_width=True)
+    st.dataframe(metrics.platform_reliability(runs_f, start, end), hide_index=True, width="stretch")
     st.caption("Share of publishing runs reported as posted on each platform.")
 with col_b:
     st.subheader("Missed scheduled runs")
@@ -150,7 +152,7 @@ with col_b:
         st.dataframe(
             missed.assign(agent=missed["agent"].map(agent_labels))[["agent", "due"]],
             hide_index=True,
-            use_container_width=True,
+            width="stretch",
         )
 
 st.subheader("Run log")
@@ -160,7 +162,7 @@ log = period[period["outcome"].isin(outcomes)].assign(agent=lambda d: d["agent"]
 st.dataframe(
     log[["run_date", "agent", "outcome", "status", "pillar", "topic", "platforms_ok", "notes"]],
     hide_index=True,
-    use_container_width=True,
+    width="stretch",
 )
 
 with st.expander("Assumptions and definitions"):
